@@ -111,30 +111,57 @@ def print_stats(stats: dict, sequence_length: int) -> None:
     print(f"  GC-content: {stats['gc_ratio_A']:.2f}%")
 
 
-def main():
-    length = validate_positive_int("Podaj długość sekwencji: ")
-    seq_id = validate_sequence_id("Podaj ID sekwencji: ")
-    description = input("Podaj opis sekwencji: ")
-    name = input("Podaj imię: ")
+def batch_mode() -> None:
+    print("[BATCH MODE]")
+    sequences_qty = validate_positive_int("Podaj ilość sekwencji do wygenerowania: ")
+    length = validate_positive_int("Podaj długość każdej sekwencji: ")
+    seq_id = validate_sequence_id("Podaj bazowe ID sekwencji: ")
+    description = input("Podaj bazowy opis sekwencji: ")
 
-    biological_sequence = generate_sequence(length)
-    stats = calculate_stats(biological_sequence)
+    file_content = ""
 
-    sequence_for_file = insert_name(biological_sequence, name)
-    fasta_content = format_fasta(
-        seq_id=seq_id,
-        description=description,
-        sequence=sequence_for_file,
-        line_width=LINE_WIDTH
-    )
+    for i in range(0, sequences_qty):
+        curr_seq_id = f"{seq_id}_{i+1}"
+        biological_sequence = generate_sequence(length)
+        curr_fasta_content = format_fasta(
+            seq_id=curr_seq_id,
+            description=description,
+            sequence=biological_sequence,
+            line_width=LINE_WIDTH
+        )
+
+        file_content += curr_fasta_content
+        file_content += "\n"
 
     filename = f"{seq_id}.fasta"
-    save_to_file(filename, fasta_content)
+    save_to_file(filename, file_content)
 
-    print()
-    print(f"Sekwencja zapisana do pliku: {filename}")
+def main():
+    # length = validate_positive_int("Podaj długość sekwencji: ")
+    # seq_id = validate_sequence_id("Podaj ID sekwencji: ")
+    # description = input("Podaj opis sekwencji: ")
+    # name = input("Podaj imię: ")
 
-    print_stats(stats, length)
+    # biological_sequence = generate_sequence(length)
+    # stats = calculate_stats(biological_sequence)
+
+    # sequence_for_file = insert_name(biological_sequence, name)
+    # fasta_content = format_fasta(
+    #     seq_id=seq_id,
+    #     description=description,
+    #     sequence=sequence_for_file,
+    #     line_width=LINE_WIDTH
+    # )
+
+    # filename = f"{seq_id}.fasta"
+    # save_to_file(filename, fasta_content)
+
+    # print()
+    # print(f"Sekwencja zapisana do pliku: {filename}")
+
+    # print_stats(stats, length)
+
+    batch_mode()
 
 
 if __name__ == "__main__":
