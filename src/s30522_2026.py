@@ -112,6 +112,7 @@ def print_stats(stats: dict, sequence_length: int) -> None:
 
 
 def batch_mode() -> None:
+    """Generowanie sekwencji w trybie batch mode"""
     print("[BATCH MODE]")
     sequences_qty = validate_positive_int("Podaj ilość sekwencji do wygenerowania: ")
     length = validate_positive_int("Podaj długość każdej sekwencji: ")
@@ -136,32 +137,97 @@ def batch_mode() -> None:
     filename = f"{seq_id}.fasta"
     save_to_file(filename, file_content)
 
+def to_mrna(
+    dna_sequence: str
+) -> str:
+    """Translacja DNA na mRNA z walidacją poprawności wejściowej sekwencji DNA"""
+    if any(nucleotide not in NUCLEOTIDES for nucleotide in dna_sequence):
+        raise ValueError('Invalid DNA sequence. Cannot translate to mRNA')
+
+    return dna_sequence.replace("T", "U")
+    
+def format_fasta_dna_with_corresponding_mrna(    
+    seq_id: str,
+    description: str,
+    dna_sequence: str,
+    line_width: int = 80
+) -> str:
+    """formatowanie zawartości pliku fasta dla DNA i odpowiadającego mRNA"""
+    mrna_sequence = to_mrna(dna_sequence)
+
+    fasta_dna = format_fasta(
+        seq_id=seq_id,
+        description=description,
+        sequence=dna_sequence,
+        line_width=LINE_WIDTH
+    )
+
+    seq_id_mrna = f"{seq_id}_mRNA"
+    description_mrna = f"{description} (mRNA)"
+    fasta_mrna = format_fasta(
+        seq_id=seq_id_mrna,
+        description=description_mrna,
+        sequence=mrna_sequence,
+        line_width=LINE_WIDTH
+    )
+
+    return fasta_dna + "\n" + fasta_mrna
+
+def generate_dna_with_mrna() -> None:
+    """Generowanie pliku DNA + odpowiadające mRNA"""
+    print("Generowanie pliku fasta z sekwencją DNA oraz odpowiadającą mRNA")
+    length = validate_positive_int("Podaj długość sekwencji: ")
+    seq_id = validate_sequence_id("Podaj ID sekwencji: ")
+    description = input("Podaj opis sekwencji: ")
+
+    biological_sequence = generate_sequence(length)
+
+    fasta_content = format_fasta_dna_with_corresponding_mrna(
+        seq_id=seq_id,
+        description=description,
+        dna_sequence=biological_sequence,
+        line_width=LINE_WIDTH
+    )
+
+    filename = f"{seq_id}.fasta"
+    save_to_file(filename, fasta_content)
+
+    print()
+    print(f"Sekwencja zapisana do pliku: {filename}")
+
+
 def main():
-    # length = validate_positive_int("Podaj długość sekwencji: ")
-    # seq_id = validate_sequence_id("Podaj ID sekwencji: ")
-    # description = input("Podaj opis sekwencji: ")
-    # name = input("Podaj imię: ")
+    print("\n===== Podstawowa funkcjonalność częsci pierwszej =====")
+    length = validate_positive_int("Podaj długość sekwencji: ")
+    seq_id = validate_sequence_id("Podaj ID sekwencji: ")
+    description = input("Podaj opis sekwencji: ")
+    name = input("Podaj imię: ")
 
-    # biological_sequence = generate_sequence(length)
-    # stats = calculate_stats(biological_sequence)
+    biological_sequence = generate_sequence(length)
+    stats = calculate_stats(biological_sequence)
 
-    # sequence_for_file = insert_name(biological_sequence, name)
-    # fasta_content = format_fasta(
-    #     seq_id=seq_id,
-    #     description=description,
-    #     sequence=sequence_for_file,
-    #     line_width=LINE_WIDTH
-    # )
+    sequence_for_file = insert_name(biological_sequence, name)
+    fasta_content = format_fasta(
+        seq_id=seq_id,
+        description=description,
+        sequence=sequence_for_file,
+        line_width=LINE_WIDTH
+    )
 
-    # filename = f"{seq_id}.fasta"
-    # save_to_file(filename, fasta_content)
+    filename = f"{seq_id}.fasta"
+    save_to_file(filename, fasta_content)
 
-    # print()
-    # print(f"Sekwencja zapisana do pliku: {filename}")
+    print()
+    print(f"Sekwencja zapisana do pliku: {filename}")
 
-    # print_stats(stats, length)
+    print_stats(stats, length)
 
+
+    print("\n===== Funkcjonalność 1 - batch mode =====")
     batch_mode()
+
+    print("\n===== Funkcjonalność 2 - generowanie DNA + mRNA do jednego pliku fasta =====")
+    generate_dna_with_mrna()
 
 
 if __name__ == "__main__":
