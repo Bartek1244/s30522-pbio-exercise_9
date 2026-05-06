@@ -150,7 +150,7 @@ def format_fasta_dna_with_corresponding_mrna(
     seq_id: str,
     description: str,
     dna_sequence: str,
-    line_width: int = 80
+    line_width: int = LINE_WIDTH
 ) -> str:
     """formatowanie zawartości pliku fasta dla DNA i odpowiadającego mRNA"""
     mrna_sequence = to_mrna(dna_sequence)
@@ -159,7 +159,7 @@ def format_fasta_dna_with_corresponding_mrna(
         seq_id=seq_id,
         description=description,
         sequence=dna_sequence,
-        line_width=LINE_WIDTH
+        line_width=line_width
     )
 
     seq_id_mrna = f"{seq_id}_mRNA"
@@ -168,7 +168,7 @@ def format_fasta_dna_with_corresponding_mrna(
         seq_id=seq_id_mrna,
         description=description_mrna,
         sequence=mrna_sequence,
-        line_width=LINE_WIDTH
+        line_width=line_width
     )
 
     return fasta_dna + "\n" + fasta_mrna
@@ -195,6 +195,22 @@ def generate_dna_with_mrna() -> None:
     print()
     print(f"Sekwencja zapisana do pliku: {filename}")
 
+def find_pattern(sequence: str, pattern: str) -> list:
+    if len(pattern) > len(sequence):
+        raise ValueError("Błąd. Motyw jest dłuższy od sekwencji")
+
+    positions_found = []
+    pattern_length = len(pattern)
+
+    for i in range(len(sequence)):
+        if sequence[i:i+pattern_length] == pattern:
+            positions_found.append(i+1)
+
+    print(f"Motyw: {pattern}")
+    print(f"Ilość wykrytych motywów w sekwencji: {len(positions_found)}")
+    print(f"Wykryte pozycje motywu w sekwencji: {positions_found}")
+
+    return positions_found
 
 def main():
     print("\n===== Podstawowa funkcjonalność częsci pierwszej =====")
@@ -229,6 +245,8 @@ def main():
     print("\n===== Funkcjonalność 2 - generowanie DNA + mRNA do jednego pliku fasta =====")
     generate_dna_with_mrna()
 
+    print("\n===== Funkcjonalność 3 - wykrywanie motywu w sekwencji =====")
+    find_pattern(generate_sequence(800), "ATG")
 
 if __name__ == "__main__":
     main()
